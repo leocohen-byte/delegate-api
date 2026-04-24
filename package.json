@@ -1,6 +1,6 @@
 {
   "name": "delegate-api",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Delegate fraud detection API",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "pg": "^8.11.5"
   },
   "engines": {
     "node": ">=18"
