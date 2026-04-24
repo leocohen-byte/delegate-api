@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delegate — SDK demo · Signup form</title>
+  <meta name="description" content="Live SDK integration demo. A real signup form using the real Delegate SDK calling the real API." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07090f;
+      --bg-alt: #0b0e17;
+      --surface: #111623;
+      --surface-hi: #161c2d;
+      --border: #1d2438;
+      --border-hi: #2a3352;
+      --text: #f1f3f9;
+      --text-mid: #b4bccd;
+      --text-dim: #7683a0;
+      --accent: #5b8eff;
+      --accent-hi: #7fa5ff;
+      --ok: #3ddc97;
+      --warn: #ffb454;
+      --danger: #ff6b6b;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+    body {
+      font-family: "Inter", -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(91, 142, 255, 0.1), transparent 60%),
+        var(--bg);
+    }
+
+    /* Top nav */
+    .nav { padding: 18px 28px; border-bottom: 1px solid var(--border); }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
+    .logo-mark { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(91, 142, 255, 0.4); }
+    .nav-back { color: var(--text-dim); font-size: 0.9rem; text-decoration: none; transition: color 0.15s ease; }
+    .nav-back:hover { color: var(--text); }
+
+    /* Main wrapper */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 60px 28px 100px; }
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+    h1 em { font-family: "Fraunces", serif; font-style: italic; font-weight: 400; color: var(--accent-hi); font-size: 1.05em; }
+    .sub { color: var(--text-mid); font-size: 1.05rem; margin-bottom: 48px; max-width: 640px; line-height: 1.55; }
+
+    /* Grid */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+    /* Form card */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+    }
+    .form-card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .form-sub { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 26px; }
+
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--text-mid);
+      margin-bottom: 7px;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(91, 142, 255, 0.15);
+    }
+    input::placeholder { color: var(--text-dim); }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 13px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .submit-btn:hover { background: var(--accent-hi); transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Result — appears after submit */
+    .result {
+      margin-top: 24px;
+      padding: 22px;
+      border-radius: 10px;
+      border: 1px solid;
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .result.show { display: block; }
+    .result.r-allow { background: rgba(61, 220, 151, 0.1); border-color: rgba(61, 220, 151, 0.35); }
+    .result.r-challenge { background: rgba(255, 180, 84, 0.1); border-color: rgba(255, 180, 84, 0.35); }
+    .result.r-block { background: rgba(255, 107, 107, 0.1); border-color: rgba(255, 107, 107, 0.35); }
+    .result-top { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+    .result-title { font-size: 0.72rem; font-family: var(--mono); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 4px; }
+    .result-score { font-family: var(--mono); font-size: 2rem; font-weight: 500; line-height: 1; }
+    .result-score small { color: var(--text-dim); font-size: 0.9rem; }
+    .result-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .r-allow .result-badge { background: rgba(61, 220, 151, 0.18); color: var(--ok); }
+    .r-challenge .result-badge { background: rgba(255, 180, 84, 0.18); color: var(--warn); }
+    .r-block .result-badge { background: rgba(255, 107, 107, 0.18); color: var(--danger); }
+    .result-message {
+      font-size: 0.92rem;
+      color: var(--text-mid);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .result-message strong { color: var(--text); font-weight: 600; }
+    .result-reasons {
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .result-reasons-title {
+      font-size: 0.72rem;
+      font-family: var(--mono);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .result-reasons ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .result-reasons li {
+      padding-left: 20px;
+      position: relative;
+      color: var(--text-mid);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .result-reasons li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 8px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+    .r-allow .result-reasons li::before { background: var(--ok); }
+    .r-challenge .result-reasons li::before { background: var(--warn); }
+    .r-block .result-reasons li::before { background: var(--danger); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Right panel: live signals */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .panel h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .panel-sub { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 22px; line-height: 1.5; }
+    .signal-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 11px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 0.9rem;
+    }
+    .signal-row:last-child { border-bottom: none; }
+    .sig-name { color: var(--text-dim); }
+    .sig-value {
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .sig-value.bad { color: var(--warn); }
+    .sig-value.ok { color: var(--ok); }
+
+    /* Code block at the bottom */
+    .code-block {
+      margin-top: 56px;
+      padding: 28px 32px;
+      background: #05070c;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow-x: auto;
+    }
+    .code-block-title {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .code-block pre { font-family: var(--mono); font-size: 0.88rem; line-height: 1.75; color: var(--text); }
+    .code-block .c-kw { color: var(--accent-hi); }
+    .code-block .c-str { color: var(--ok); }
+    .code-block .c-com { color: var(--text-dim); font-style: italic; }
+    .code-block .c-tag { color: #ff7b9c; }
+    .code-block .c-attr { color: var(--warn); }
+
+    .footnote {
+      margin-top: 48px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .footnote a { color: var(--accent); text-decoration: none; }
+    .footnote a:hover { color: var(--accent-hi); }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo"><span class="logo-mark"></span> Delegate</a>
+      <a href="/" class="nav-back">← Back to site</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="kicker">Live SDK demo</p>
+    <h1>Try the SDK on a <em>real signup form.</em></h1>
+    <p class="sub">
+      This page uses the production Delegate SDK. Fill out the form naturally — the SDK silently collects signals as you interact, then sends them to the live API when you submit. Every submission is logged in the admin dashboard.
+    </p>
+
+    <div class="grid">
+      <!-- FORM -->
+      <div class="form-card">
+        <h2>Create your account</h2>
+        <p class="form-sub">Mock signup form. No data is stored beyond the fraud scoring log.</p>
+
+        <form id="signup-form" autocomplete="off">
+          <div class="field">
+            <label for="fullname">Full name</label>
+            <input type="text" id="fullname" name="fullname" placeholder="Jane Doe" required />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@company.com" required />
+          </div>
+          <div class="field">
+            <label for="company">Company</label>
+            <input type="text" id="company" name="company" placeholder="Acme Inc" />
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">Create account</button>
+        </form>
+
+        <div id="result" class="result">
+          <div class="result-top">
+            <div>
+              <div class="result-title">Risk score</div>
+              <div class="result-score"><span id="res-score">—</span><small>/100</small></div>
+            </div>
+            <div class="result-badge" id="res-badge">—</div>
+          </div>
+          <p class="result-message" id="res-message"></p>
+          <div class="result-reasons">
+            <div class="result-reasons-title">Why</div>
+            <ul id="res-reasons-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE SIGNALS -->
+      <div class="panel">
+        <h2>Signals collected live</h2>
+        <p class="panel-sub">The SDK updates these as you interact with the form. No network request is made until you submit.</p>
+
+        <div class="signal-row"><span class="sig-name">Automated browser</span><span class="sig-value" id="sig-webdriver">—</span></div>
+        <div class="signal-row"><span class="sig-name">Mouse movements</span><span class="sig-value" id="sig-mouse">0</span></div>
+        <div class="signal-row"><span class="sig-name">Key presses</span><span class="sig-value" id="sig-keys">0</span></div>
+        <div class="signal-row"><span class="sig-name">Paste events</span><span class="sig-value" id="sig-paste">0</span></div>
+        <div class="signal-row"><span class="sig-name">Tab switches</span><span class="sig-value" id="sig-tabs">0</span></div>
+        <div class="signal-row"><span class="sig-name">Time on page</span><span class="sig-value" id="sig-time">0ms</span></div>
+        <div class="signal-row"><span class="sig-name">Device ID</span><span class="sig-value" id="sig-fp" style="font-size:0.72rem">—</span></div>
+      </div>
+    </div>
+
+    <!-- Integration snippet -->
+    <div class="code-block">
+      <div class="code-block-title">The actual integration — this page uses exactly this code</div>
+<pre><span class="c-com">&lt;!-- Load the SDK --&gt;</span>
+<span class="c-tag">&lt;script</span> <span class="c-attr">src</span>=<span class="c-str">"https://testdelegate.com/sdk/delegate.js"</span><span class="c-tag">&gt;&lt;/script&gt;</span>
+
+<span class="c-tag">&lt;script&gt;</span>
+  <span class="c-com">// Initialize as soon as possible</span>
+  Delegate.<span class="c-kw">init</span>({ apiKey: <span class="c-str">'your_key_here'</span> });
+
+  <span class="c-com">// On form submit, verify before continuing</span>
+  form.addEventListener(<span class="c-str">'submit'</span>, <span class="c-kw">async</span> (e) =&gt; {
+    e.preventDefault();
+    <span class="c-kw">const</span> result = <span class="c-kw">await</span> Delegate.<span class="c-kw">verify</span>();
+
+    <span class="c-kw">if</span> (result.verdict === <span class="c-str">'block'</span>) {
+      <span class="c-com">// Don't create the account</span>
+    } <span class="c-kw">else if</span> (result.verdict === <span class="c-str">'challenge'</span>) {
+      <span class="c-com">// Require extra verification (OTP, captcha, KYC)</span>
+    } <span class="c-kw">else</span> {
+      <span class="c-com">// Allow the signup through</span>
+    }
+  });
+<span class="c-tag">&lt;/script&gt;</span></pre>
+    </div>
+
+    <p class="footnote">
+      Every submission creates a real entry in the admin dashboard.<br />
+      <a href="/">Back to testdelegate.com</a>
+    </p>
+  </main>
+
+  <!-- The real SDK -->
+  <script src="/sdk/delegate.js"></script>
+
+  <script>
+    // Initialize the SDK with debug logging
+    Delegate.init({ debug: true });
+
+    // ---- Live signals display (read SDK state directly) ----
+    var sigWebdriver = document.getElementById('sig-webdriver');
+    var isBot = navigator.webdriver === true;
+    sigWebdriver.textContent = isBot ? 'Yes' : 'No';
+    sigWebdriver.classList.add(isBot ? 'bad' : 'ok');
+
+    // Show fingerprint once available
+    var fpEl = document.getElementById('sig-fp');
+    var s0 = Delegate.currentSignals();
+    if (s0 && s0.fingerprint) fpEl.textContent = s0.fingerprint;
+
+    var startTime = Date.now();
+
+    // Poll SDK state every 200ms for live display
+    setInterval(function () {
+      var s = Delegate.currentSignals();
+      if (!s) return;
+      document.getElementById('sig-mouse').textContent = s.mouseMovements;
+      document.getElementById('sig-keys').textContent = s.keyPresses;
+      document.getElementById('sig-paste').textContent = s.pasteEvents;
+      document.getElementById('sig-tabs').textContent = s.tabSwitches;
+      var elapsed = Date.now() - startTime;
+      document.getElementById('sig-time').textContent =
+        elapsed < 1000 ? elapsed + 'ms' : (elapsed / 1000).toFixed(1) + 's';
+    }, 200);
+
+    // ---- Form submission ----
+    var form = document.getElementById('signup-form');
+    var submitBtn = document.getElementById('submit-btn');
+    var resultBox = document.getElementById('result');
+
+    var verdictMessages = {
+      allow: 'This signup would be <strong>let through normally</strong>. The signals look consistent with a real user.',
+      challenge: 'This signup would <strong>trigger extra verification</strong> (OTP, captcha, or KYC). Enough signals are off that your fraud team should double-check.',
+      block: 'This signup would be <strong>blocked</strong>. The signals strongly suggest automation or fraud.'
+    };
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying…';
+      resultBox.className = 'result';
+
+      Delegate.verify().then(function (result) {
+        resultBox.className = 'result show r-' + result.verdict;
+        document.getElementById('res-score').textContent = result.score;
+        document.getElementById('res-badge').textContent =
+          result.verdict === 'allow' ? 'Allow signup' :
+          result.verdict === 'challenge' ? 'Extra verification' :
+          'Block signup';
+        document.getElementById('res-message').innerHTML = verdictMessages[result.verdict] || '';
+
+        var list = document.getElementById('res-reasons-list');
+        list.innerHTML = '';
+        if (result.reasons && result.reasons.length) {
+          result.reasons.forEach(function (r) {
+            var li = document.createElement('li');
+            li.textContent = r;
+            list.appendChild(li);
+          });
+        } else {
+          var li = document.createElement('li');
+          li.textContent = 'No risk signals triggered — signup looks clean';
+          list.appendChild(li);
+        }
+
+        // Refresh fingerprint display in case it was generated late
+        if (result._signals && result._signals.fingerprint) {
+          fpEl.textContent = result._signals.fingerprint;
+        }
+      }).catch(function (err) {
+        resultBox.className = 'result show r-block';
+        document.getElementById('res-score').textContent = '—';
+        document.getElementById('res-badge').textContent = 'Error';
+        document.getElementById('res-message').textContent = 'Could not verify: ' + err.message;
+        document.getElementById('res-reasons-list').innerHTML = '';
+      }).finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      });
+    });
+  </script>
+</body>
+</html>
