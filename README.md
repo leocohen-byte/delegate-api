@@ -16,7 +16,8 @@ Accepts signal payload, returns risk score.
   "fingerprint": "abc123...",
   "webdriver": false,
   "formFillTimeMs": 8400,
-  "mouseMovements": 42
+  "mouseMovements": 42,
+  "pasteEvents": 0
 }
 ```
 
@@ -26,9 +27,17 @@ Accepts signal payload, returns risk score.
   "score": 15,
   "verdict": "allow",
   "reasons": [],
-  "timestamp": "2026-04-23T21:00:00Z"
+  "timestamp": "2026-04-23T22:00:00Z"
 }
 ```
+
+### `GET /admin?token=YOUR_TOKEN`
+Admin dashboard. Requires `ADMIN_TOKEN` env var set.
+
+## Environment variables
+
+- `DATABASE_URL` — Postgres connection string (optional, falls back to in-memory)
+- `ADMIN_TOKEN` — token required to view /admin
 
 ## Running locally
 
@@ -38,7 +47,3 @@ npm start
 ```
 
 Server runs on port 3000.
-
-## Status
-
-Early-stage. Expanding signals and scoring over time.
